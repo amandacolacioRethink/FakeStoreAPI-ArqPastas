@@ -1,95 +1,54 @@
 import { Request, Response } from "express";
-import knex from "knex";
-import config from "../../knexfile";
-import { Category } from "../types/types";
+import categoriesServices from "../services/categoriesService";
 
-const knexInstance = knex(config);
-
-const index = async (req: Request, res: Response) => {
+const index = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const categories: Category[] = await knexInstance("categories").select("*");
-    const formatedCategories = categories.map((category) => category.name);
-    res.status(200).json(formatedCategories);
-  } catch (error:any) {
-    res.send(error);
-  }
-};
-
-const show = async (req: Request, res: Response) => {
-  try {
-    const { category } = req.params;
-    const products = await knexInstance("products")
-    .select(
-      "*",
-      "categories.name as category",
-      "categories.id as category_id",
-      "products.id as id"
-    )
-    .join("categories", "categories.id", "=", "products.category_id")
-    .where({ category });
-
-    const formatedProducts = products.map((product) => ({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      description: product.description,
-      category: product.category,
-      image: product.image,
-      rating: {
-        rate: product.rate,
-        count: product.count,
-      },
-    }));
-
-    res.status(200).json(formatedProducts);
+    const categoriesArray = await categoriesServices.getCategoriesNames();
+    res.status(200).send(categoriesArray);
   } catch (error: any) {
     res.send(error.message ? { error: error.message } : error);
   }
 };
 
-const insert = async (req: Request, res: Response) => {
+const show = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name } = req.body;
-
-    const id: number[] = await knexInstance("categories").insert({
-      name,
-    });
-
-    res.status(201).json({ id: id[0], name});
-  } catch (error: any) {
-    res.send(error);
-  }
-};
-
-const update = async (req: Request, res: Response) => {
-  try {
-    const id:string = req.params.id;
-    const { name } = req.body;
-    const updatedData: Category = { name };
-
-    await knexInstance("categories")
-      .update(updatedData)
-      .where({ id });
-
-    res.status(200).json({id,name});
+    const id: number = parseInt(req.params.id);
+    const category = await categoriesServices.getCategoryById(id);
+    res.status(200).send(category);
   } catch (error: any) {
     res.send(error.message ? { error: error.message } : error);
   }
 };
 
-const remove = async (req: Request, res: Response) => {
+const insert = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id:string = req.params.id;
-    const category = await knexInstance("categories").delete().where({ id });
-    if (!category) throw new Error("This category was not found");
-
-    res.status(200).json({ mensagem: "Category deleted" });
+    const { name }: { name: string } = req.body;
+    const createdCategory = await categoriesServices.createCategory(name);
+    res.status(201).send(createdCategory);
   } catch (error: any) {
     res.send(error.message ? { error: error.message } : error);
   }
 };
 
-export default { insert, index, show, update, remove };
+const update = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id: number = parseInt(req.params.id);
+    const { name }: { name: string } = req.body;
+    const category = await categoriesServices.putCategory(name, id);
+    res.status(201).send(category);
+  } catch (error: any) {
+    res.send(error.message ? { error: error.message } : error);
+  }
+};
 
+const remove = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id: number = parseInt(req.params.id);
+    const category = await categoriesServices.removeCategory(id);
+    res.status(200).json(category);
+  } catch (error: any) {
+    res.send(error.message ? { error: error.message } : error);
+  }
+};
 
-
+export default { index, show, insert, update, remove };
