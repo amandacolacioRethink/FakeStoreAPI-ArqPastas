@@ -35,14 +35,13 @@ const show = async (req: Request, res: Response, next:NextFunction) => {
   }
 };
 
-const update = async (req: Request, res: Response, next:NextFunction ) => {
+const put = async (req: Request, res: Response, next:NextFunction ) => {
   try {
     const id:string = req.params.id;
-    const {title , price, description,category, image, rating }: ProductWithRating = req.body;
-    const product = {id,title, price,description,category, image,rate:rating.rate, count:rating.count}
-    await productsService.updateProduct(product)
+    const product: ProductWithRating = req.body;
+    await productsService.putProduct(product,Number(id))
 
-    res.status(200).json({id,title , price, description,category, image, rating  });
+    res.status(200).json({id:id, ...product});
   } catch (error: unknown) {
     next(error)
   }
@@ -59,5 +58,15 @@ const remove = async (req: Request, res: Response, next:NextFunction) => {
   }
 };
 
+const patch = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id: string = req.params.id;
+    const product = req.body;
+    const patchProduct = await productsService.patchProduct(parseInt(id), product);
+    res.status(200).send(patchProduct[0]);
+  } catch (error) {
+    next(error);
+  }
+};
 
-export default { insert,index,show,update,remove};
+export default { insert,index,show,put,remove,patch};

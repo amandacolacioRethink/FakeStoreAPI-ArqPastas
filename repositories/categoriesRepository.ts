@@ -6,7 +6,23 @@ const knexInstance: Knex = knex(config);
 
 const getCategoriesNames = () => knexInstance("categories").select("name");
 
+const findCategory= (name:string)=> knexInstance("categories").select("id").where({ "categories.name": name });
+
 const getCategoryById = (id: number) => knexInstance("categories").select("*").where({ "categories.id": id });
+
+const getProductsByCategory = (categoryId:number) => knexInstance("products")
+.select(
+  "products.id",
+  "products.title",
+  "products.price",
+  "products.description",
+  "products.image",
+  "categories.name as category ",
+  "products.rate",
+  "products.count"
+)
+.join("categories", "categories.id", "=", "products.category_id")
+.where({ "products.category_id": categoryId });
 
 const selectCategoryByName =  (name: string) => knexInstance("categories")
     .select("*")
@@ -25,4 +41,6 @@ export default {
   createCategory,
   updateCategory,
   deleteCategory,
+  getProductsByCategory,
+  findCategory
 };

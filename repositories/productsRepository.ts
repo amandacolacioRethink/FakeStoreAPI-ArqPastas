@@ -29,9 +29,10 @@ const getProductById = (id:string) => knexInstance("products")
     .join("categories", "categories.id", "=", "products.category_id")
     .where({"products.id": id });
 
-const updateProduct = (product:any) => knexInstance("products").update(product).where({ id: product.id });
+const updateProduct = (product:any, id:number) => knexInstance("products").update(product).where({id}).returning("*");
 
 const deleteProduct = (id:string) => knexInstance("products").delete().where({ id });
+
 
 export default{
     findCategory,

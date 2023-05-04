@@ -1,6 +1,7 @@
 import { Product, ProductWithRating, Category } from "../types/types";
 import productsRepository from "../repositories/productsRepository";
 import { makeError  } from "../middleware/erroHandler"
+import { string } from "yup";
 
 const insertProduct=async (product:ProductWithRating) => {
     const categoryExists = await productsRepository.findCategory(product.category)  
@@ -38,14 +39,23 @@ const getProductById =async (id:string) => {
       }));    
 }
 
-const updateProduct =async (product:any) => {
+const putProduct =async (product:any, id:number) => {
     const categoryExists = await productsRepository.findCategory(product.category)  
     if (!categoryExists[0]) 
         throw makeError({ message: "This category was not found", status: 400 });
 
     product.category_id = categoryExists[0].id;
-    delete product.category     
-    return await productsRepository.updateProduct(product)
+    product.rate =product.rating.rate;
+    product.count =product.rating.count;
+
+    delete product.category 
+    delete product.rating    
+    const productId=await productsRepository.updateProduct(product,id)
+
+    if (!productId)
+    throw makeError({ message: "Product not found", status: 400 });
+    return productId;
+
 }
 
 const deleteProduct =async (id:string) => {
@@ -54,10 +64,41 @@ const deleteProduct =async (id:string) => {
     return product
 }
 
+const patchProduct = async (id: number, product: any) => {
+    const newProduct = { ...product, ...product.rating };
+    delete newProduct.rating;
+    delete newProduct.category;
+  
+    let categoryId;
+  
+    if (product.category) {
+      const category = await productsRepository.findCategory(product.category!);
+  
+      if (category.length === 0) {
+        throw makeError({ message: "Categoria was not found", status: 400 });
+      }
+  
+      categoryId = category[0].id;
+    }
+  
+    await productsRepository.updateProduct(
+      {
+        ...newProduct,
+        category_id: product.category ? categoryId : undefined,
+      },
+      id
+    );
+    delete product.category  
+    const productFromDatabase = await productsRepository.updateProduct(product,id);
+  
+    return productFromDatabase;
+  };
+
 export default {
     insertProduct,
     getAllProducts,
     getProductById,
-    updateProduct,
-    deleteProduct
+    putProduct,
+    deleteProduct,
+    patchProduct
 }

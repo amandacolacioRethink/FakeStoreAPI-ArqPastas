@@ -1,5 +1,7 @@
 import { Request, Response,NextFunction } from "express";
 import categoriesServices from "../services/categoriesService";
+import categoriesService from "../services/categoriesService";
+import { Product, ProductWithRating } from "../types/types";
 
 const index = async (_req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
@@ -12,9 +14,9 @@ const index = async (_req: Request, res: Response,next:NextFunction): Promise<vo
 
 const show = async (req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
-    const id: number = parseInt(req.params.id);
-    const category = await categoriesServices.getCategoryById(id);
-    res.status(200).send(category);
+    const category: string = req.params.category;
+    const productsByCategory: ProductWithRating[] = await categoriesServices.getProductsByCategory(category);
+    res.status(200).send(productsByCategory);
   } catch (error: unknown) {
     next(error)
   }
