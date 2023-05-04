@@ -1,19 +1,18 @@
 import { Product, ProductWithRating, Category } from "../types/types";
 import productsRepository from "../repositories/productsRepository";
-import categoriesServices from "../services/categoriesService";
+import { makeError  } from "../middleware/erroHandler"
 
-const findCategoryService =async (category:string) => {
-    const categoryExists = await productsRepository.findCategoryRepository(category)  
-    if (!categoryExists[0]) throw new Error("This category was not found");
-    return categoryExists[0].id;
+const insertProduct=async (product:ProductWithRating) => {
+    const categoryExists = await productsRepository.findCategory(product.category)  
+    if (!categoryExists[0]) 
+        throw makeError({ message: "This category was not found", status: 400 });
+
+    const categoryId: number | undefined = categoryExists[0].id;
+    return await productsRepository.insertProduct(product, categoryId)
 }
 
-const insertProductService =async (product:ProductWithRating, categoryId:number|undefined) => {
-    return await productsRepository.insertProductRepository(product, categoryId)
-}
-
-const getAllProductsService =async () => {
-    const products: Product[] = await productsRepository.getAllProductsRepository();
+const getAllProducts =async () => {
+    const products: Product[] = await productsRepository.getAllProducts();
     return products.map((product) => ({
         id: product.id,
         title: product.title,
@@ -25,10 +24,10 @@ const getAllProductsService =async () => {
       }));
 }
 
-const getProductByIdService =async (id:string) => {
-    const product: Product[] = await productsRepository.getProductByIdRepository(id);
-    if (!product.length) throw new Error("This product was not found");
-    return product.map((product) => ({
+const getProductById =async (id:string) => {
+    const product: Product[] = await productsRepository.getProductById(id);
+    if (!product.length) throw makeError({ message: "This product was not found", status: 400 });
+     return product.map((product) => ({
         id: parseInt(id),
         title: product.title,
         price: product.price,
@@ -39,26 +38,26 @@ const getProductByIdService =async (id:string) => {
       }));    
 }
 
-const updateProduct =async (product:Product, id:string) => {
-    if (product.category)
-    {
-      const categoryData:any = await productsRepository.updateCategory(product.category,id)
-       product.category = categoryData[0].id;
-     }
-    return await productsRepository.updateProduct(product, id)
+const updateProduct =async (product:any) => {
+    const categoryExists = await productsRepository.findCategory(product.category)  
+    if (!categoryExists[0]) 
+        throw makeError({ message: "This category was not found", status: 400 });
+
+    product.category_id = categoryExists[0].id;
+    delete product.category     
+    return await productsRepository.updateProduct(product)
 }
 
 const deleteProduct =async (id:string) => {
     const product = await productsRepository.deleteProduct(id)
-    if (!product) throw new Error("This product was not found");
+    if (!product) throw makeError({ message: "This product was not found", status: 400 });
     return product
 }
 
 export default {
-    findCategoryService,
-    insertProductService,
-    getAllProductsService,
-    getProductByIdService,
+    insertProduct,
+    getAllProducts,
+    getProductById,
     updateProduct,
     deleteProduct
 }

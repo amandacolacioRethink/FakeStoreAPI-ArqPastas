@@ -1,75 +1,61 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import knex from "knex";
 import config from "../../knexfile";
-import { Category, Product,ProductWithRating } from "../types/types";
+import { ProductWithRating } from "../types/types";
 import productsService from "../services/productsService";
 
 const knexInstance = knex(config);
 
-const insert = async (req: Request, res: Response) => {
+const insert = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const product:ProductWithRating = req.body;
-    const categoryId: number | undefined = await productsService.findCategoryService(product.category);
-    const createdProduct = await productsService.insertProductService(product, categoryId); 
+    const createdProduct = await productsService.insertProduct(product); 
     res.status(201).json({ id: createdProduct[0], ...product});
-  } catch (error:any) {
-    res.send(error.message ?{error: error.message}: error);
+  } catch (error: unknown) {
+    next(error)
   }
 };
 
-const index = async (req: Request, res: Response) => {
+const index = async (req: Request, res: Response, next:NextFunction) => {
   try {
-    const products:ProductWithRating[] = await productsService.getAllProductsService()    
+    const products:ProductWithRating[] = await productsService.getAllProducts()    
     res.status(200).json(products);
-  } catch (error:any) {
-    res.send(error.message ? { error: error.message } : error);
+  } catch (error: unknown) {
+    next(error)
   }
 };
 
-const show = async (req: Request, res: Response) => {
+const show = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const id : string = req.params.id;
-    const product : ProductWithRating[] = await productsService.getProductByIdService(id);
+    const product : ProductWithRating[] = await productsService.getProductById(id);
     res.status(200).json(product[0]);
-  } catch (error: any) {
-    res.send(error.message ? { error: error.message } : error);
+  } catch (error: unknown) {
+    next(error)
   }
 };
 
-const update = async (req: Request, res: Response) => {
+const update = async (req: Request, res: Response, next:NextFunction ) => {
   try {
     const id:string = req.params.id;
-    const {title , price, description, category, image, rating }: ProductWithRating = req.body;
-    const updateData: any = { title , price, description, image, rate:rating.rate, count:rating.count };
-    if (category) {
-      const categoryData :any= await knexInstance("categories")
-        .select("id")
-        .where({ name: category });
+    const {title , price, description,category, image, rating }: ProductWithRating = req.body;
+    const product = {id,title, price,description,category, image,rate:rating.rate, count:rating.count}
+    await productsService.updateProduct(product)
 
-      if (!categoryData[0]) {
-        throw new Error("This category was not found");
-      }
-      updateData.category_id = categoryData[0].id;
-    }
-
-    await knexInstance("products").update(updateData).where({ id });
-
-    res.status(200).json({ title , price, description, category, image, rating });
-  } catch (error: any) {
-    res.send(error.message ? { error: error.message } : error);
+    res.status(200).json({id,title , price, description,category, image, rating  });
+  } catch (error: unknown) {
+    next(error)
   }
 };
 
-const remove = async (req: Request, res: Response) => {
+const remove = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const id:string = req.params.id;
-    const product = await knexInstance("products").delete().where({ id });
-
-    if (!product) throw new Error("This product was not found");
+    await productsService.deleteProduct(id)
 
     res.status(200).json({ mensagem: "Product deleted" });
-  } catch (error: any) {
-    res.send(error.message ? { error: error.message } : error);
+  } catch (error: unknown) {
+    next(error)
   }
 };
 

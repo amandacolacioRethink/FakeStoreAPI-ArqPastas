@@ -1,62 +1,48 @@
 import categoriesRepository from "../repositories/categoriesRepository";
 import { Category } from "../types/types";
+import { makeError  } from "../middleware/erroHandler"
 
 const getCategoriesNames = async () => {
   const categories: Category[] =
-    await categoriesRepository.selectAllCategoriesNames();
-  const categoriesArray = categories.map((category: Category) => category.name);
-  return categoriesArray;
+  await categoriesRepository.getCategoriesNames();
+  return categories.map((category: Category) => category.name);
 };
 
 const getCategoryById = async (id: number) => {
-  try {
-    const category = await categoriesRepository.selectCategoryById(id);
-    if (!category.length) {
-      throw new Error("Category not found");
-    }
+    const category = await categoriesRepository.getCategoryById(id);
+    if (!category.length) throw makeError({ message: "Category not found", status: 400 });
     return category[0];
-  } catch (error: any) {
-    return error.message ? { error: error.message } : error;
   }
-};
-
+  
 const createCategory = async (name: string) => {
-    const searchCategoryByName = await categoriesRepository.selectCategoryByName(
-      name
-    );
+    const searchCategoryByName = await categoriesRepository.selectCategoryByName(name);
     if (!searchCategoryByName.length) {
-      const createdCategoryId = await categoriesRepository.insertCategory(name);
+      const createdCategoryId = await categoriesRepository.createCategory(name);
       return { id: createdCategoryId[0], name };
     }
-    throw new Error("Category already exists");
+    throw makeError({ message: "Category already exists", status: 400 });
 };
 
-const putCategory = async (name: string, id: number) => {
-    const searchCategoryByName = await categoriesRepository.selectCategoryByName(
-      name
-    );
+const updateCategory = async (name: string, id: number) => {
+    const searchCategoryByName = await categoriesRepository.selectCategoryByName(name);
     if (!searchCategoryByName.length) {
       const updatedCategory = await categoriesRepository.updateCategory(name, id);
       if (!updatedCategory) throw new Error("Could not update category");
       return { id, name };
     }
-    throw new Error("Category name already exists");
+    throw makeError({ message: "Category already exists", status: 400 });
 };
 
-const removeCategory = async (id: number) => {
-  try {
+const deleteCategory = async (id: number) => {
     const deletedCategory = await categoriesRepository.deleteCategory(id);
-    if (!deletedCategory) throw new Error("Category does not exist");
+    if (!deletedCategory) throw makeError({ message: "Category doesn't exists", status: 400 });
     return { message: "Category deleted" };
-  } catch (error: any) {
-    return error.message ? { error: error.message } : error;
-  }
 };
 
 export default {
   getCategoriesNames,
   getCategoryById,
   createCategory,
-  putCategory,
-  removeCategory,
+  updateCategory,
+  deleteCategory,
 };
