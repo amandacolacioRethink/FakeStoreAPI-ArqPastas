@@ -5,8 +5,8 @@ import loginService from "../services/loginService";
 
 const index = async (_req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
-
-    res.status(200).send();
+    const user = await userService.getUsers();
+    res.status(200).send(user);
   } catch (error: unknown) {
     next(error)
   }
@@ -14,8 +14,9 @@ const index = async (_req: Request, res: Response,next:NextFunction): Promise<vo
 
 const show = async (req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
-   
-    res.status(200).send();
+    const id: number = parseInt(req.params.id);;
+    const showUser: User = await userService.getUserById(id);
+    res.status(200).send(showUser);
   } catch (error: unknown) {
     next(error)
   }
@@ -25,7 +26,7 @@ const insert = async (req: Request, res: Response,next:NextFunction): Promise<vo
   try {
     const user = req.body;
     const createdUser = await userService.createUser(user);
-    res.status(200).send({id:createdUser, ...user});
+    res.status(200).send(createdUser);
   } catch (error: unknown) {
     next(error)
   }
@@ -53,8 +54,9 @@ const update = async (req: Request, res: Response,next:NextFunction): Promise<vo
 
 const remove = async (req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
-  
-    res.status(200).json();
+    const id: number = parseInt(req.params.id);
+    const deletedUser = await userService.deleteUser(id);
+    res.status(200).json(deletedUser);
   } catch (error: unknown) {
     next(error)
   }

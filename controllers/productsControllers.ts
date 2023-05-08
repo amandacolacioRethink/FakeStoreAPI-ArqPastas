@@ -10,7 +10,7 @@ const insert = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const product:ProductWithRating = req.body;
     const createdProduct = await productsService.insertProduct(product); 
-    res.status(201).json({ id: createdProduct[0], ...product});
+    res.status(201).json(createdProduct);
   } catch (error: unknown) {
     next(error)
   }
@@ -28,8 +28,8 @@ const index = async (req: Request, res: Response, next:NextFunction) => {
 const show = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const id : string = req.params.id;
-    const product : ProductWithRating[] = await productsService.getProductById(id);
-    res.status(200).json(product[0]);
+    const product = await productsService.getProductById(id);
+    res.status(200).json(product);
   } catch (error: unknown) {
     next(error)
   }
@@ -39,9 +39,9 @@ const put = async (req: Request, res: Response, next:NextFunction ) => {
   try {
     const id:string = req.params.id;
     const product: ProductWithRating = req.body;
-    await productsService.putProduct(product,Number(id))
+    const updatedProduct = await productsService.putProduct(product,Number(id))
 
-    res.status(200).json({id:id, ...product});
+    res.status(200).json(updatedProduct);
   } catch (error: unknown) {
     next(error)
   }
@@ -63,7 +63,7 @@ const patch = async (req: Request, res: Response, next: NextFunction) => {
     const id: string = req.params.id;
     const product = req.body;
     const patchProduct = await productsService.patchProduct(parseInt(id), product);
-    res.status(200).send(patchProduct[0]);
+    res.status(200).send(patchProduct);
   } catch (error) {
     next(error);
   }

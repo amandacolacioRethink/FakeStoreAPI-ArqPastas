@@ -13,12 +13,11 @@ const getUserById = async (id: number) => {
   }
   
 const createUser = async (user: any) => {
-      const saltRounds = process.env.SALT!
-      const hash = await bcrypt.hash(user.senha, Number(saltRounds));
-      user.senha=hash;
-      const createUser = await loginRepository.createUser(user);
-      return createUser[0];
-    
+    const saltRounds = process.env.SALT!
+    const hash = await bcrypt.hash(user.senha, Number(saltRounds));
+    user.senha=hash;
+    const createUser = await loginRepository.createUser(user);
+    return {id: createUser[0], ...user}  
 };
 
 const updateUser = async (user: User, id: number) => {

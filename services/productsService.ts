@@ -9,7 +9,8 @@ const insertProduct=async (product:ProductWithRating) => {
         throw makeError({ message: "This category was not found", status: 400 });
 
     const categoryId: number | undefined = categoryExists[0].id;
-    return await productsRepository.insertProduct(product, categoryId)
+    const createdProduct = await productsRepository.insertProduct(product, categoryId)
+    return { id: createdProduct[0], ...product}
 }
 
 const getAllProducts =async () => {
@@ -28,7 +29,7 @@ const getAllProducts =async () => {
 const getProductById =async (id:string) => {
     const product: Product[] = await productsRepository.getProductById(id);
     if (!product.length) throw makeError({ message: "This product was not found", status: 400 });
-     return product.map((product) => ({
+    const formattedProduct = product.map((product) => ({
         id: parseInt(id),
         title: product.title,
         price: product.price,
@@ -36,7 +37,8 @@ const getProductById =async (id:string) => {
         category: product.category,
         image: product.image,
         rating: {rate: product.rate, count:product.count}
-      }));    
+      })); 
+    return formattedProduct[0]   
 }
 
 const putProduct =async (product:any, id:number) => {
@@ -54,8 +56,7 @@ const putProduct =async (product:any, id:number) => {
 
     if (!productId)
     throw makeError({ message: "Product not found", status: 400 });
-    return productId;
-
+    return {id:id, ...product};
 }
 
 const deleteProduct =async (id:string) => {
@@ -91,7 +92,7 @@ const patchProduct = async (id: number, product: any) => {
     delete product.category  
     const productFromDatabase = await productsRepository.updateProduct(product,id);
   
-    return productFromDatabase.map((product) => ({
+    const updatedProductFormatted = productFromDatabase.map((product) => ({
       id: id,
       title: product.title,
       price: product.price,
@@ -100,6 +101,7 @@ const patchProduct = async (id: number, product: any) => {
       image: product.image,
       rating: {rate: product.rate, count:product.count}
     })); 
+    return updatedProductFormatted[0];
   };
 
 export default {
