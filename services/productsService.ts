@@ -91,7 +91,15 @@ const patchProduct = async (id: number, product: any) => {
     delete product.category  
     const productFromDatabase = await productsRepository.updateProduct(product,id);
   
-    return productFromDatabase;
+    return productFromDatabase.map((product) => ({
+      id: id,
+      title: product.title,
+      price: product.price,
+      description: product.description,
+      category: product.category,
+      image: product.image,
+      rating: {rate: product.rate, count:product.count}
+    })); 
   };
 
 export default {

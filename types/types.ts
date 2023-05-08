@@ -1,10 +1,15 @@
-export {Category, Product, ProductWithRating}
+export {Category, Product, ProductWithRating,User}
 
 type Category = {
     id?: number;
     name: string;
 };
 
+type User = {
+    id?: number;
+    user: string,
+    senha: string
+}
   
 type Product = {
     id?: number;

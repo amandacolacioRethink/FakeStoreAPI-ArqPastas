@@ -1,6 +1,8 @@
 import { errorHandler } from "./middleware/erroHandler";
 import express, { Request, Response} from 'express';
 import { router } from "./routes";
+import * as dotenv from 'dotenv' 
+dotenv.config()
 const app = express();
 
 app.use(express.json());
