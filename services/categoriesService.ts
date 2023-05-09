@@ -5,6 +5,7 @@ import { makeError  } from "../middleware/erroHandler"
 const getCategoriesNames = async () => {
   const categories: Category[] =
   await categoriesRepository.getCategoriesNames();
+  console.log(categories)
   return categories.map((category: Category) => category.name);
 };
 

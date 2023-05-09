@@ -21,17 +21,31 @@ const insertProduct = (product:ProductWithRating, categoryId: number| undefined)
     });
 
 const getAllProducts = () => knexInstance("products")
-    .select("*", "categories.name as category","products.id as id")
+    .select("products.id", 
+    "products.title",
+    "products.price",
+    "products.description",
+    "products.image",
+    "products.rate",
+    "products.count",
+    "categories.name as category")
     .join("categories", "categories.id", "=", "products.category_id");
 
-const getProductById = (id:string) => knexInstance("products")
-    .select("*", "categories.name as category")
+const getProductById = (id:number) => knexInstance("products")
+    .select("products.id", 
+    "products.title",
+    "products.price",
+    "products.description",
+    "products.image",
+    "products.rate",
+    "products.count",
+    "categories.name as category")
     .join("categories", "categories.id", "=", "products.category_id")
     .where({"products.id": id });
 
-const updateProduct = (product:any, id:number) => knexInstance("products").update(product).where({id}).returning("*");
+const updateProduct = (product:ProductWithRating, id:number) => knexInstance("products").update(product).where({id}).returning("*");
 
-const deleteProduct = (id:string) => knexInstance("products").delete().where({ id });
+const deleteProduct = (id:number) => knexInstance("products").delete().where({ id });
 
 
 export default{

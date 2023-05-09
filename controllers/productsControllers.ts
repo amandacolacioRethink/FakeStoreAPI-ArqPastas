@@ -27,7 +27,7 @@ const index = async (req: Request, res: Response, next:NextFunction) => {
 
 const show = async (req: Request, res: Response, next:NextFunction) => {
   try {
-    const id : string = req.params.id;
+    const id : number = Number(req.params.id);
     const product = await productsService.getProductById(id);
     res.status(200).json(product);
   } catch (error: unknown) {
@@ -49,7 +49,7 @@ const put = async (req: Request, res: Response, next:NextFunction ) => {
 
 const remove = async (req: Request, res: Response, next:NextFunction) => {
   try {
-    const id:string = req.params.id;
+    const id:number = Number(req.params.id);
     await productsService.deleteProduct(id)
 
     res.status(200).json({ mensagem: "Product deleted" });

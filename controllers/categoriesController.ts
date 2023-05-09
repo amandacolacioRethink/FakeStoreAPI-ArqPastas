@@ -1,6 +1,5 @@
 import { Request, Response,NextFunction } from "express";
 import categoriesServices from "../services/categoriesService";
-import categoriesService from "../services/categoriesService";
 import { Product, ProductWithRating } from "../types/types";
 
 const index = async (_req: Request, res: Response,next:NextFunction): Promise<void> => {

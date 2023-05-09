@@ -5,6 +5,7 @@ import { string } from "yup";
 
 const insertProduct=async (product:ProductWithRating) => {
     const categoryExists = await productsRepository.findCategory(product.category)  
+    console.log(categoryExists)
     if (!categoryExists[0]) 
         throw makeError({ message: "This category was not found", status: 400 });
 
@@ -26,11 +27,12 @@ const getAllProducts =async () => {
       }));
 }
 
-const getProductById =async (id:string) => {
+const getProductById =async (id:number) => {
     const product: Product[] = await productsRepository.getProductById(id);
+    console.log(product)
     if (!product.length) throw makeError({ message: "This product was not found", status: 400 });
     const formattedProduct = product.map((product) => ({
-        id: parseInt(id),
+        id: id,
         title: product.title,
         price: product.price,
         description: product.description,
@@ -53,14 +55,15 @@ const putProduct =async (product:any, id:number) => {
     delete product.category 
     delete product.rating    
     const productId=await productsRepository.updateProduct(product,id)
+    console.log(productId)
 
-    if (!productId)
-    throw makeError({ message: "Product not found", status: 400 });
+    if (!productId.length) throw makeError({ message: "Product not found", status: 400 });
     return {id:id, ...product};
 }
 
-const deleteProduct =async (id:string) => {
+const deleteProduct =async (id:number) => {
     const product = await productsRepository.deleteProduct(id)
+    console.log(product)
     if (!product) throw makeError({ message: "This product was not found", status: 400 });
     return product
 }
@@ -90,8 +93,8 @@ const patchProduct = async (id: number, product: any) => {
       id
     );
     delete product.category  
-    const productFromDatabase = await productsRepository.updateProduct(product,id);
-  
+    const productFromDatabase = await productsRepository.updateProduct(newProduct,id);
+    if(!productFromDatabase.length) throw makeError({ message: "Product not found", status: 400 })
     const updatedProductFormatted = productFromDatabase.map((product) => ({
       id: id,
       title: product.title,
