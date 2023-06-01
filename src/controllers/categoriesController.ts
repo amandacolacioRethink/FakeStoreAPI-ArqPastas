@@ -4,7 +4,7 @@ import { Product, ProductWithRating } from "../types/types";
 
 const index = async (_req: Request, res: Response,next:NextFunction): Promise<void> => {
   try {
-    const categoriesArray = await categoriesServices.getCategoriesNames();
+    const categoriesArray = await categoriesServices.getAllCategories();
     res.status(200).send(categoriesArray);
   } catch (error: unknown) {
     next(error)
