@@ -4,6 +4,8 @@ import { Knex } from "knex";
 
 const knexInstance: Knex = knex(config);
 
+const getAllCategories = () => knexInstance("categories").select("*");
+
 const getCategoriesNames = () => knexInstance("categories").select("name");
 
 const findCategory= (name:string)=> knexInstance("categories").select("id").where({ "categories.name": name });
@@ -35,6 +37,7 @@ const updateCategory =  (name: string, id: number) => knexInstance("categories")
 const deleteCategory =  (id: number) => knexInstance("categories").delete().where({ id });
 
 export default {
+  getAllCategories,
   getCategoriesNames,
   getCategoryById,
   selectCategoryByName,

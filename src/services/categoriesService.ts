@@ -2,6 +2,8 @@ import categoriesRepository from "../repositories/categoriesRepository";
 import { Category } from "../types/types";
 import { makeError  } from "../middleware/erroHandler"
 
+const getAllCategories =async () => await categoriesRepository.getAllCategories();
+
 const getCategoriesNames = async () => {
   const categories: Category[] =
   await categoriesRepository.getCategoriesNames();
@@ -60,6 +62,7 @@ const deleteCategory = async (id: number) => {
 };
 
 export default {
+  getAllCategories,
   getCategoriesNames,
   getCategoryById,
   createCategory,
