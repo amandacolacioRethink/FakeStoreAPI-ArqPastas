@@ -5,13 +5,12 @@ import { Product, ProductWithRating, Category } from "../types/types";
 
 const knexInstance: Knex = knex(config);
 
-const findCategoryRepository =async (category:string) => {
- return await knexInstance("categories")
+const findCategory = (category:string) =>  knexInstance("categories")
     .select("id")
     .where({ name: category });
-}
-const insertProductRepository =async (product:ProductWithRating, categoryId: number| undefined) => {
-   return await knexInstance("products").insert({
+
+const insertProduct = (product:ProductWithRating, categoryId: number| undefined) => 
+    knexInstance("products").insert({
         title: product.title,
         price: product.price,
         description: product.description,
@@ -20,39 +19,40 @@ const insertProductRepository =async (product:ProductWithRating, categoryId: num
         rate: product.rating.rate,
         count: product.rating.count
     });
-}
 
-const getAllProductsRepository =async () => {
-    return await knexInstance("products")
-    .select("*", "categories.name as category","products.id as id")
+const getAllProducts = () => knexInstance("products")
+    .select("products.id", 
+    "products.title",
+    "products.price",
+    "products.description",
+    "products.image",
+    "products.rate",
+    "products.count",
+    "categories.name as category")
     .join("categories", "categories.id", "=", "products.category_id");
-}
 
-const getProductByIdRepository =async (id:string) => {
-    return await knexInstance("products")
-    .select("*", "categories.name as category")
+const getProductById = (id:number) => knexInstance("products")
+    .select("products.id", 
+    "products.title",
+    "products.price",
+    "products.description",
+    "products.image",
+    "products.rate",
+    "products.count",
+    "categories.name as category")
     .join("categories", "categories.id", "=", "products.category_id")
     .where({"products.id": id });
-}
-const updateProduct =async (product:Product, id:string) => {
-    return await knexInstance("products").update(product).where({ id });
-}
 
-const deleteProduct =async (id:string) => {
-    return await knexInstance("products").delete().where({ id });
-}
+const updateProduct = (product:ProductWithRating, id:number) => knexInstance("products").update(product).where({id}).returning("*");
 
-const updateCategory =async (name:string, id:string) => {
-    return await knexInstance("categories")
-    .select("id")
-    .where({ name: name });
-}
+const deleteProduct = (id:number) => knexInstance("products").delete().where({ id });
+
+
 export default{
-    findCategoryRepository,
-    insertProductRepository,
-    getAllProductsRepository,
-    getProductByIdRepository,
+    findCategory,
+    insertProduct,
+    getAllProducts,
+    getProductById,
     updateProduct,
     deleteProduct,
-    updateCategory
 }

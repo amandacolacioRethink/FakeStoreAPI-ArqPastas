@@ -4,31 +4,43 @@ import { Knex } from "knex";
 
 const knexInstance: Knex = knex(config);
 
-const selectAllCategoriesNames = async () =>
-  await knexInstance("categories").select("name");
+const getCategoriesNames = () => knexInstance("categories").select("name");
 
-const selectCategoryById = async (id: number) =>
-  await knexInstance("categories").select("*").where({ "categories.id": id });
+const findCategory= (name:string)=> knexInstance("categories").select("id").where({ "categories.name": name });
 
-const selectCategoryByName = async (name: string) =>
-  await knexInstance("categories")
+const getCategoryById = (id: number) => knexInstance("categories").select("*").where({ "categories.id": id });
+
+const getProductsByCategory = (categoryId:number) => knexInstance("products")
+.select(
+  "products.id",
+  "products.title",
+  "products.price",
+  "products.description",
+  "products.image",
+  "categories.name as category ",
+  "products.rate",
+  "products.count"
+)
+.join("categories", "categories.id", "=", "products.category_id")
+.where({ "products.category_id": categoryId });
+
+const selectCategoryByName =  (name: string) => knexInstance("categories")
     .select("*")
     .where({ "categories.name": name });
 
-const insertCategory = async (name: string) =>
-  await knexInstance("categories").insert({ name });
+const createCategory =  (name: string) => knexInstance("categories").insert({ name });
 
-const updateCategory = async (name: string, id: number) =>
-  await knexInstance("categories").update({ name }).where({ id });
+const updateCategory =  (name: string, id: number) => knexInstance("categories").update({ name }).where({ id });
 
-const deleteCategory = async (id: number) =>
-  await knexInstance("categories").delete().where({ id });
+const deleteCategory =  (id: number) => knexInstance("categories").delete().where({ id });
 
 export default {
-  selectAllCategoriesNames,
-  selectCategoryById,
+  getCategoriesNames,
+  getCategoryById,
   selectCategoryByName,
-  insertCategory,
+  createCategory,
   updateCategory,
   deleteCategory,
+  getProductsByCategory,
+  findCategory
 };
